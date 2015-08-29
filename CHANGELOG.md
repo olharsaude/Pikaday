@@ -4,7 +4,10 @@
 
 - Add theme class support, see #260
 - Fix on iOS, see #101
+<<<<<<< HEAD
 - Fix #249
+=======
+>>>>>>> a5a5b1fb4dd9dd908962e0d368609f8a44fd1dfa
 
 ## 1.3.3 - Time
 
