@@ -478,6 +478,9 @@
                     if (self._d && opts.showTime) {
                         newDate.setHours(self._d.getHours());
                         newDate.setMinutes(self._d.getMinutes());
+                    }else{
+                        newDate.setHours(new Date().getHours());
+                        newDate.setMinutes(new Date().getMinutes());
                     }
                     self.setDate(newDate);
                     if (opts.bound) {
@@ -612,7 +615,7 @@
         self.el = document.createElement('div');
         self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '') + (opts.theme ? ' ' + opts.theme : '');
 
-        addEvent(self.el, 'ontouchend' in document ? 'ontouchend' : 'mousedown', self._onMouseDown, true);
+        addEvent(self.el, 'touchend' in document ? 'touchend' : 'mousedown', self._onMouseDown, true);
         addEvent(self.el, 'change', self._onChange);
 
         if (opts.field) {
