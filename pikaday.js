@@ -478,6 +478,9 @@
                     if (self._d && opts.showTime) {
                         newDate.setHours(self._d.getHours());
                         newDate.setMinutes(self._d.getMinutes());
+                    }else{
+                        newDate.setHours(new Date().getHours());
+                        newDate.setMinutes(new Date().getMinutes());
                     }
                     self.setDate(newDate);
                     if (opts.bound) {
@@ -487,7 +490,8 @@
                                 opts.field.blur();
                             }
                         }, 100);
-                    }                }
+                    }                
+                }
                 else if (hasClass(target, 'pika-prev')) {
                     self.prevMonth();
                 }
