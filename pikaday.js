@@ -460,14 +460,14 @@
             }
 
             // Do not preventDefaul when using time picker
-            if (        !hasClass(target, 'pika-select')
-                        && !hasClass(target, 'pika-select-hour')
-                        && !hasClass(target, 'pika-select-minute')
-                        && !hasClass(target, 'pika-select-second')) {
-                e.preventDefault();
-            }
+            // if (!hasClass(target, 'pika-select-hour')
+            //             && !hasClass(target, 'pika-select-minute')
+            //             && !hasClass(target, 'pika-select-second')) {
+            //     e.preventDefault();
+            // }
 
-            if (!hasClass(target, 'is-disabled')) {
+            // if (!hasClass(target, 'is-disabled')) {
+            if (!hasClass(target.parentNode, 'is-disabled')){
                 if (hasClass(target, 'pika-button') && !hasClass(target, 'is-empty')) {
                     var newDate = new Date(
                             target.getAttribute('data-pika-year'),
@@ -485,13 +485,12 @@
                     self.setDate(newDate);
                     if (opts.bound) {
                         sto(function() {
-                            //self.hide();
+                            self.hide();
                             if (opts.field) {
                                 opts.field.blur();
                             }
                         }, 100);
-                    }
-                    return;
+                    }                
                 }
                 else if (hasClass(target, 'pika-prev')) {
                     self.prevMonth();
@@ -579,7 +578,7 @@
 
             if (!self._c) {
                 self._b = sto(function() {
-                    //self.hide();
+                    self.hide();
                 }, 50);
             }
             self._c = false;
@@ -615,7 +614,7 @@
         self.el = document.createElement('div');
         self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '') + (opts.theme ? ' ' + opts.theme : '');
 
-        addEvent(self.el, 'touchend' in document ? 'touchend' : 'mousedown', self._onMouseDown, true);
+        addEvent(self.el, 'ontouchend' in document ? 'ontouchend' : 'mousedown', self._onMouseDown, true);
         addEvent(self.el, 'change', self._onChange);
 
         if (opts.field) {
