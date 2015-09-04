@@ -475,13 +475,13 @@
                             target.getAttribute('data-pika-day')
                         );
                     // Preserve time selection when date changed
-                    //if (self._d && opts.showTime) {
+                    if (self._d && opts.showTime) {
                         newDate.setHours(self._d.getHours());
                         newDate.setMinutes(self._d.getMinutes());
-                    // }else{
-                    //     newDate.setHours(new Date().getHours());
-                    //     newDate.setMinutes(new Date().getMinutes());
-                    // }
+                    }else{
+                        newDate.setHours(new Date().getHours());
+                        newDate.setMinutes(new Date().getMinutes());
+                    }
                     self.setDate(newDate);
                     if (opts.bound) {
                         sto(function() {
@@ -986,8 +986,8 @@
             if (opts.showTime) {
                 html += '<div class="pika-time-container">' +
                         renderTime(
-                            this._d ? this._d.getHours() : 0,//new Date().getHours(),
-                            this._d ? this._d.getMinutes() : 0,//new Date().getMinutes(),
+                            this._d ? this._d.getHours() : new Date().getHours(),
+                            this._d ? this._d.getMinutes() : new Date().getMinutes(),
                             this._d ? this._d.getSeconds() : 0,
                             opts)
                     + '</div>';
