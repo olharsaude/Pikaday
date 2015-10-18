@@ -49,13 +49,13 @@
 
     select {
         cursor: pointer;
-        position: absolute;
+        /*position: absolute;*/
         z-index: 9998;
         margin: 0;
         left: 0;
         top: 5px;
-        filter: alpha(opacity=0);
-        opacity: 0;
+        /*filter: alpha(opacity=0);
+        opacity: 0;*/
     }
 }
 
