@@ -338,7 +338,7 @@
         return '<thead>' + (opts.isRTL ? arr.reverse() : arr).join('') + '</thead>';
     },
 
-    renderTitle = function(instance, c, year, month, refYear)
+    renderTitle = function(instance, c, year, month, refYear, showEmpty)
     {
         var i, j, arr,
             opts = instance._o,
@@ -350,13 +350,17 @@
             prev = true,
             next = true;
 
-        for (arr = [], i = 0; i < 12; i++) {
+        var arr = [];
+        if(showEmpty)
+            arr.push('<option value selected></option>');
+
+        for (i = 0; i < 12; i++) {
             arr.push('<option value="' + (year === refYear ? i - c : 12 + i - c) + '"' +
-                (i === month ? ' selected': '') +
-                ((isMinYear && i < opts.minMonth) || (isMaxYear && i > opts.maxMonth) ? 'disabled' : '') + '>' +
+                (i === month && !showEmpty ? ' selected': '') +
+                (((isMinYear && i < opts.minMonth) || (isMaxYear && i > opts.maxMonth)) && !showEmpty ? 'disabled' : '') + '>' +
                 opts.i18n.months[i] + '</option>');
         }
-        monthHtml = '<div class="pika-label"><select class="pika-select pika-select-month" tabindex="-1">' + arr.join('') + '</select></div>';//' + opts.i18n.months[month] + '
+        monthHtml = '<div class="pika-label dropdown"><select class="pika-select pika-select-month" tabindex="-1">' + arr.join('') + '</select></div>';//' + opts.i18n.months[month] + '
 
         if (isArray(opts.yearRange)) {
             i = opts.yearRange[0];
@@ -366,12 +370,16 @@
             j = 1 + year + opts.yearRange;
         }
 
-        for (arr = []; i < j && i <= opts.maxYear; i++) {
+        var arr = [];
+        if(showEmpty)
+            arr.push('<option value selected></option>');
+
+        for (;i < j && i <= opts.maxYear; i++) {
             if (i >= opts.minYear) {
-                arr.push('<option value="' + i + '"' + (i === year ? ' selected': '') + '>' + (i) + '</option>');
+                arr.push('<option value="' + i + '"' + (i === year && !showEmpty ? ' selected': '') + '>' + (i) + '</option>');
             }
         }
-        yearHtml = '<div class="pika-label"><select class="pika-select pika-select-year" tabindex="-1">' + arr.join('') + '</select></div>';//' + year + opts.yearSuffix + '
+        yearHtml = '<div class="pika-label dropdown"><select class="pika-select pika-select-year" tabindex="-1">' + arr.join('') + '</select></div>';//' + year + opts.yearSuffix + '
 
         if (opts.showMonthAfterYear) {
             html += yearHtml + monthHtml;
@@ -402,16 +410,20 @@
         return '<table cellpadding="0" cellspacing="0" class="pika-table">' + renderHead(opts) + renderBody(data) + '</table>';
     },
 
-    renderTimePicker = function(num_options, selected_val, select_class, display_func) {
-        var to_return = '<td><select class="pika-select '+select_class+'">';
+    renderTimePicker = function(num_options, selected_val, select_class, display_func, showEmpty) {
+        var to_return = '<td class="dropdown"><select class="pika-select '+select_class+'">';
+
+        if(showEmpty)
+            to_return += '<option value selected></option>';
+
         for (var i=0; i<num_options; i++) {
-            to_return += '<option value="'+i+'" '+(i==selected_val ? 'selected' : '')+'>'+display_func(i)+'</option>'
+            to_return += '<option value="'+i+'" '+(i==selected_val && !showEmpty ? 'selected' : '')+'>'+display_func(i)+'</option>'
         }
         to_return += '</select></td>';
         return to_return;
     },
 
-    renderTime = function(hh, mm, ss, opts)
+    renderTime = function(hh, mm, ss, opts, showEmpty)
     {
         var to_return = '<table cellpadding="0" cellspacing="0" class="pika-time"><tbody><tr>' +
             renderTimePicker(24, hh, 'pika-select-hour', function(i) {
@@ -427,13 +439,13 @@
                         return to_return;
                     }
                 }
-            }) +
+            }, showEmpty) +
             '<td>:</td>' +
-            renderTimePicker(60, mm, 'pika-select-minute', function(i) { if (i < 10) return "0" + i; return i });
+            renderTimePicker(60, mm, 'pika-select-minute', function(i) { if (i < 10) return "0" + i; return i }, showEmpty);
 
         if (opts.showSeconds) {
             to_return += '<td>:</td>' +
-                renderTimePicker(60, ss, 'pika-select-second', function(i) { if (i < 10) return "0" + i; return i });
+                renderTimePicker(60, ss, 'pika-select-second', function(i) { if (i < 10) return "0" + i; return i }, showEmpty);
         }
         return to_return + '</tr></tbody></table>';
     },
@@ -513,6 +525,7 @@
 
         self._onChange = function(e)
         {
+
             e = e || window.event;
             var target = e.target || e.srcElement;
             if (!target) {
@@ -1063,6 +1076,38 @@
             ].join(';');
         },
 
+
+        renderDayCombo : function(year, month, _this, showEmpty){
+
+            var opts   = this._o,
+                now    = new Date(),
+                days   = getDaysInMonth(year, month);
+
+            // Ensure we only compare date portion when deciding to show a date in picker
+            var maxDate_date = (opts.maxDate ? new Date(opts.maxDate.getFullYear(), opts.maxDate.getMonth(), opts.maxDate.getDate()) : null).getTime();
+            var to_return = '<div class="pika-label dropdown"><select class="pika-select pika-select-day">';
+
+            //console.log(showEmpty);
+
+            if(showEmpty)
+              to_return += '<option value selected></option>'
+
+            for(var i = 1; i <= days; i++){
+              var day = new Date(year, month, i);
+              var isValid = _this._d  && i == _this._d.getDate();
+              var isToday = compareDates(day, now);
+              if((isValid || (!_this._d && isToday)) && !showEmpty){
+                  to_return += '<option value="'+i+'" selected>'+i+'</option>'
+              }else{
+                if(day.getTime() <= maxDate_date || showEmpty)
+                  to_return += '<option value="'+i+'">'+i+'</option>'
+                else
+                    to_return += '<option value="'+i+'" disabled>'+i+'</option>'
+              }
+            }
+            to_return += '</select></div>';
+            return to_return;
+        },
         /**
          * render HTML for a particular month
          */
@@ -1120,6 +1165,104 @@
         isVisible: function()
         {
             return this._v;
+        },
+
+        //show the mobile component instead
+        mobile: function(opts, scope, elem, attrs, $compile){
+
+          //get html from the calendar (5 combos)
+          function drawMobile(_this, showEmpty){
+              var dateHtml = '<div class="pika-mobile hidden-lg hidden-md hidden-sm">';
+              for (var c = 0; c < 1; c++) {
+                  dateHtml += _this.renderDayCombo(_this.calendars[c].year, _this.calendars[c].month, _this, showEmpty) + renderTitle(_this, c, _this.calendars[c].year, _this.calendars[c].month, _this.calendars[0].year, showEmpty);
+              }
+              var hourHtml = '<div class="pika-time-container">' +
+                                  renderTime(
+                                  _this._d ? _this._d.getHours() : new Date().getHours(),
+                                  _this._d ? _this._d.getMinutes() : new Date().getMinutes(),
+                                  _this._d ? _this._d.getSeconds() : 0,
+                                  opts, showEmpty) + '</div>';
+              var newElHtml = dateHtml;
+              if(opts.showTime)
+                newElHtml += hourHtml;
+              newElHtml += '</div>';
+              return newElHtml;
+          }
+
+          function getDateNewElement($el, date){
+              var $$el = $($el);
+              if($$el.hasClass('pika-select-day')){
+                var day = $$el.val();
+                date['day'] = day;
+              }else if($$el.hasClass('pika-select-month')){
+                var month = $$el.val();
+                date['month'] = month;
+              }else if($$el.hasClass('pika-select-year')){
+                var year = $$el.val();
+                date['year'] = year;
+              }else if($$el.hasClass('pika-select-hour')){
+                var hour = $$el.val();
+                date['hour'] = hour;
+              }else if($$el.hasClass('pika-select-minute')){
+                var minute = $$el.val();
+                date['minute'] = minute;
+              }else{
+                var length = $el.childNodes.length;
+                for(var i = 0; i < length; i++){
+                  date = getDateNewElement($el.childNodes[i], date);
+                }
+              }
+              return date;
+          }
+
+          var _pikaday = this;
+          function bindEl(){
+              var $el = $(this).closest('.pika-mobile');
+              var date = {};
+              var newValue = getDateNewElement($el[0], date);
+
+              if(date.day && date.month && date.year && (!opts['showTime'] || date.minute && date.hour)){
+                if(opts['showTime']){
+                  _pikaday.setDate(new Date(date.year, date.month, date.day, date.hour, date.minute));
+                }else{
+                  _pikaday.setDate(new Date(date.year, date.month, date.day, 0, 0));
+                }
+              }
+          }
+
+          var newElHtml = drawMobile(this, !opts['required']);
+          var $elParentNode = $(elem[0].parentNode);
+          $elParentNode.addClass('hasValuePlaceholder');//show always placeholder under
+          var newHtml = angular.element(newElHtml);
+          elem.after(newHtml).addClass('hidden-xs');//hide defaultc component - bootstrap component
+
+          //watch for changes in the new component and update default el
+          $elParentNode.find('select').on('change', bindEl);
+
+          //watch for changes in the default component and update it
+          var _ref = newHtml;
+          var _elem = elem;
+          var _this = this;
+          scope.$watch('ngModel', function(newVal)
+      		{
+              if(newVal){
+                  _this.setDate(new Date(newVal));
+                  var newHtml = angular.element(drawMobile(_pikaday, false));
+                  _ref.replaceWith(newHtml);
+                  _ref = newHtml;
+                  $(_elem[0].parentNode).find('select').on('change', bindEl);
+              }
+      		}, true);
+
+          if(opts['required']){//is required and doesnt have value
+              setTimeout(function(){
+                if(_this._d)
+                  _this.setDate(_this._d);
+                else{
+                    _this.setDate(new Date());
+                }
+              }, 1000);
+          }
         },
 
         show: function()
