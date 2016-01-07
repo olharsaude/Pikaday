@@ -209,7 +209,6 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 }
 
 .pika-mobile{
-  display: flex;
   width: 100%;
   margin-top: 5px;
 }
@@ -233,18 +232,11 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     background-color: inherit;
 }
 
-.pika-mobile .pika-title .pika-prev{
-  display: none;
-}
-
-.pika-mobile .pika-title .pika-next{
-  display: none;
-}
-
 .pika-mobile .pika-time-container{
   margin: 0;
   display: inline-block;
   float: left;
+  clear:none !important;
 }
 
 .pika-mobile .pika-time-container table{
@@ -257,19 +249,15 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     margin-left: 5px;
     display: inline-block;
     margin-top: 5px;
+    color: #8A8A8A;
 }
 
-
 .pika-mobile select{
-  display: block;
+  display: inline-block;
   height: 34px;
   padding: 6px 12px;
   font-size: 14px;
-  line-height: 1.42857143;
-  color: #555;
-  background-color: #fff;
-  background-image: none;
-  border: 1px solid #ccc;
+  line-height: 20px;
   border-radius: 4px;
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
@@ -277,6 +265,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
   -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
   margin-left: 5px!important;
+  width: inherit!important;
 }
 
 .pika-mobile .pika-select-day{
@@ -284,6 +273,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 }
 
 .pika-lendar .dropdown select{
+    /*border: 0;*/
     -webkit-appearance: menulist;
     background: initial;
     background-color: initial;
