@@ -245,6 +245,9 @@
         showSeconds: false,
         use24hour: false,
 
+        //days
+        showDays: true,
+
         // when numberOfMonths is used, this will help you to choose where the main calendar will be (default `left`, can be set to `right`)
         // only used for the first display or when a selected date is not visible
         mainCalendar: 'left',
@@ -531,11 +534,22 @@
             if (!target) {
                 return;
             }
+
             if (hasClass(target, 'pika-select-month')) {
                 self.gotoMonth(target.value);
+
+                if(!opts.showDays){
+                  self.setDate(new Date($(this).find('.pika-select-year option:selected')[0].text, parseInt(target.value)+1 , 0, 0, 0));
+                }
+
             }
             else if (hasClass(target, 'pika-select-year')) {
                 self.gotoYear(target.value);
+
+                if(!opts.showDays){
+                  self.setDate(new Date(target.value, parseInt($($(this).find('.pika-select-month option:selected')[0]).val()) + 1, 0, 0, 0));
+                }
+
             }
             else if (hasClass(target, 'pika-select-hour')) {
                 self.setTime(target.value);
@@ -599,18 +613,22 @@
 
         self._onClick = function(e)
         {
+
+
             e = e || window.event;
             var target = e.target || e.srcElement,
                 pEl = target;
             if (!target) {
                 return;
             }
+
             if (!hasEventListeners && hasClass(target, 'pika-select')) {
                 if (!target.onchange) {
                     target.setAttribute('onchange', 'return;');
                     addEvent(target, 'change', self._onChange);
                 }
             }
+
             do {
                 if (hasClass(pEl, 'pika-single') ||
                     pEl === opts.trigger ||
@@ -622,6 +640,7 @@
             if (self._v && target !== opts.trigger && pEl !== opts.trigger) {
                 self.hide();
             }
+
         };
 
         self.el = document.createElement('div');
@@ -675,6 +694,13 @@
         } else {
             this.show();
         }
+
+        if (opts.setDefaultDate){
+          setTimeout(function(){
+            self.setDate(defDate);
+          }, 0);
+        }
+
     };
 
 
@@ -1083,6 +1109,9 @@
                 now    = new Date(),
                 days   = getDaysInMonth(year, month);
 
+            if(!opts.showDays)
+              return '';
+
             // Ensure we only compare date portion when deciding to show a date in picker
             var maxDate_date = (opts.maxDate ? new Date(opts.maxDate.getFullYear(), opts.maxDate.getMonth(), opts.maxDate.getDate()) : null).getTime();
             var to_return = '<div class="pika-label dropdown"><select class="pika-select pika-select-day">';
@@ -1119,6 +1148,10 @@
                 before = new Date(year, month, 1).getDay(),
                 data   = [],
                 row    = [];
+
+            if(!opts.showDays)
+              return '';
+
             if (!opts.showTime) setToStartOfDay(now);
             if (opts.firstDay > 0) {
                 before -= opts.firstDay;
