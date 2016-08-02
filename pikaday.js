@@ -364,7 +364,6 @@
                 opts.i18n.months[i] + '</option>');
         }
         monthHtml = '<div class="pika-label dropdown"><select class="pika-select pika-select-month" tabindex="-1">' + arr.join('') + '</select></div>';//' + opts.i18n.months[month] + '
-
         if (isArray(opts.yearRange)) {
             i = opts.yearRange[0];
             j = opts.yearRange[1] + 1;
@@ -373,12 +372,21 @@
             j = 1 + year + opts.yearRange;
         }
 
+        var hasMinDate = opts.minDate && !isNaN(new Date(opts.minDate).getTime());
+        if(hasMinDate)
+          i = opts.minDate.getFullYear();
+
+        var hasMaxDate = opts.maxDate && !isNaN(new Date(opts.maxDate).getTime());
+        if(hasMaxDate)
+            j = opts.maxDate.getFullYear();
+
         var arr = [];
         if(showEmpty)
             arr.push('<option value selected></option>');
 
-        for (;i < j && i <= opts.maxYear; i++) {
-            if (i >= opts.minYear) {
+        // for (;i < j && i <= opts.maxYear; i++) {
+        for (;i <= j; i++) {
+            if ( (!hasMinDate || i >= opts.minDate.getFullYear()) && (!hasMaxDate || i <= opts.maxDate.getFullYear())){
                 arr.push('<option value="' + i + '"' + (i === year && !showEmpty ? ' selected': '') + '>' + (i) + '</option>');
             }
         }
@@ -859,14 +867,14 @@
                 return;
             }
 
-            var min = this._o.minDate,
-                max = this._o.maxDate;
-
-            if (isDate(min) && date < min) {
-                date = min;
-            } else if (isDate(max) && date > max) {
-                date = max;
-            }
+            // var min = this._o.minDate,
+            //     max = this._o.maxDate;
+            //
+            // if (isDate(min) && date < min) {
+            //     date = min;
+            // } else if (isDate(max) && date > max) {
+            //     date = max;
+            // }
 
             this._d = new Date(date.getTime());
 
@@ -992,6 +1000,8 @@
         setMaxDate: function(value)
         {
             this._o.maxDate = value;
+            this._o.maxYear = value.getFullYear();
+            this._o.maxMonth = value.getMonth();
         },
 
         /**
@@ -1113,9 +1123,11 @@
               return '';
 
             // Ensure we only compare date portion when deciding to show a date in picker
-            var maxDate_date = (opts.maxDate ? new Date(opts.maxDate.getFullYear(), opts.maxDate.getMonth(), opts.maxDate.getDate()) : null).getTime();
+            var tmpMax = undefined;
+            if(opts && opts.maxDate)
+              tmpMax = new Date(opts.maxDate.getFullYear(), opts.maxDate.getMonth(), opts.maxDate.getDate());
+            var maxDate_date = tmpMax ? tmpMax.getTime() : null;
             var to_return = '<div class="pika-label dropdown"><select class="pika-select pika-select-day">';
-
             //console.log(showEmpty);
 
             if(showEmpty)
@@ -1142,6 +1154,7 @@
          */
         render: function(year, month)
         {
+
             var opts   = this._o,
                 now    = new Date(),
                 days   = getDaysInMonth(year, month),
@@ -1200,15 +1213,19 @@
             return this._v;
         },
 
+        clearMobile : function(elem){
+          $(elem).next().remove();
+        },
+
         //show the mobile component instead
         mobile: function(opts, scope, elem, attrs, $compile){
 
           //get html from the calendar (5 combos)
           function drawMobile(_this, showEmpty){
               var dateHtml = '<div class="pika-mobile hidden-lg hidden-md hidden-sm">';
-              for (var c = 0; c < 1; c++) {
-                  dateHtml += _this.renderDayCombo(_this.calendars[c].year, _this.calendars[c].month, _this, showEmpty) + renderTitle(_this, c, _this.calendars[c].year, _this.calendars[c].month, _this.calendars[0].year, showEmpty);
-              }
+              dateHtml += _this.renderDayCombo(_this.calendars[0].year, _this.calendars[0].month, _this, showEmpty)
+                            + renderTitle(_this, 0, _this.calendars[0].year, _this.calendars[0].month, _this.calendars[0].year, showEmpty);
+
               var hourHtml = '<div class="pika-time-container">' +
                                   renderTime(
                                   _this._d ? _this._d.getHours() : new Date().getHours(),
@@ -1263,10 +1280,23 @@
               }
           }
 
+          if(!isNaN(new Date(attrs.minDate).getTime())){
+            this._o.minDate = new Date(attrs.minDate);
+            this._o.minMonth = new Date(attrs.minDate).getMonth();
+            this._o.minYear = new Date(attrs.minDate).getYear();
+          }
+
+          if(!isNaN(new Date(attrs.maxDate).getTime())){
+            this._o.maxDate = new Date(attrs.maxDate);
+            this._o.maxMonth = new Date(attrs.maxDate).getMonth();
+            this._o.maxYear = new Date(attrs.maxDate).getYear();
+          }
+
           var newElHtml = drawMobile(this, !opts['required']);
           var $elParentNode = $(elem[0].parentNode);
           $elParentNode.addClass('hasValuePlaceholder');//show always placeholder under
           var newHtml = angular.element(newElHtml);
+
           elem.after(newHtml).addClass('hidden-xs');//hide defaultc component - bootstrap component
 
           //watch for changes in the new component and update default el
